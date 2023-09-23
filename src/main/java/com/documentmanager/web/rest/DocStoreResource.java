@@ -1,20 +1,20 @@
 package com.documentmanager.web.rest;
 
-import com.documentmanager.repository.DocStoreRepository;
-import com.documentmanager.service.DocStoreQueryService;
-import com.documentmanager.service.DocStoreService;
+import com.documentmanager.config.Constants;
+import com.documentmanager.repository.*;
+import com.documentmanager.service.*;
 import com.documentmanager.service.criteria.DocStoreCriteria;
 import com.documentmanager.service.dto.DocStoreDTO;
 import com.documentmanager.service.impl.DocProcessor;
 import com.documentmanager.web.rest.errors.BadRequestAlertException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import javax.print.Doc;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -44,11 +45,20 @@ public class DocStoreResource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
-    private final DocStoreService docStoreService;
+    @Autowired
+    DocStoreService docStoreService;
 
-    private final DocStoreRepository docStoreRepository;
+    @Autowired
+    DocStoreQueryService docStoreQueryService;
 
-    private final DocStoreQueryService docStoreQueryService;
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    DocColNameStoreRepository docColNameStoreRepository;
+
+    @Autowired
+    DocColValueStoreRepository docColValueStoreRepository;
 
     @Autowired
     TaskExecutor taskExecutor;
@@ -56,15 +66,10 @@ public class DocStoreResource {
     @Autowired
     DocProcessor docProcessor;
 
-    public DocStoreResource(
-        DocStoreService docStoreService,
-        DocStoreRepository docStoreRepository,
-        DocStoreQueryService docStoreQueryService
-    ) {
-        this.docStoreService = docStoreService;
-        this.docStoreRepository = docStoreRepository;
-        this.docStoreQueryService = docStoreQueryService;
-    }
+    @Autowired
+    private DocStoreAccessAuditRepository docStoreAccessAuditRepository;
+
+    public DocStoreResource() {}
 
     /**
      * {@code POST  /doc-stores} : Create a new docStore.
@@ -73,19 +78,27 @@ public class DocStoreResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new docStoreDTO, or with status {@code 400 (Bad Request)} if the docStore has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
+    @Secured({ Constants.ADMIN })
     @PostMapping("/doc-stores")
     public ResponseEntity<DocStoreDTO> createDocStore(@Valid @RequestBody DocStoreDTO docStoreDTO) throws URISyntaxException {
         log.debug("REST request to save DocStore : {}", docStoreDTO);
         if (docStoreDTO.getId() != null) {
             throw new BadRequestAlertException("A new docStore cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        DocStoreDTO result = docStoreService.save(docStoreDTO);
-        docProcessor.setDocStoreDTO(result);
-        taskExecutor.execute(docProcessor);
-        return ResponseEntity
-            .created(new URI("/api/doc-stores/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
-            .body(result);
+        try {
+            if (WorkbookFactory.create(new ByteArrayInputStream(docStoreDTO.getFileObject())) != null) {
+                DocStoreDTO result = docStoreService.save(docStoreDTO);
+                docProcessor.setDocStoreDTO(result);
+                taskExecutor.execute(docProcessor);
+                return ResponseEntity
+                    .created(new URI("/api/doc-stores/" + result.getId()))
+                    .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
+                    .body(result);
+            }
+        } catch (IOException e) {
+            throw new BadRequestAlertException("File is not an excel file", ENTITY_NAME, "notanexcelfile");
+        }
+        throw new BadRequestAlertException("Internal error contact admin", ENTITY_NAME, "internalerror");
     }
 
     /**
@@ -98,29 +111,6 @@ public class DocStoreResource {
      * or with status {@code 500 (Internal Server Error)} if the docStoreDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/doc-stores/{id}")
-    public ResponseEntity<DocStoreDTO> updateDocStore(
-        @PathVariable(value = "id", required = false) final Long id,
-        @Valid @RequestBody DocStoreDTO docStoreDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to update DocStore : {}, {}", id, docStoreDTO);
-        if (docStoreDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, docStoreDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!docStoreRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
-
-        DocStoreDTO result = docStoreService.update(docStoreDTO);
-        return ResponseEntity
-            .ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, docStoreDTO.getId().toString()))
-            .body(result);
-    }
 
     /**
      * {@code PATCH  /doc-stores/:id} : Partial updates given fields of an existing docStore, field will ignore if it is null
@@ -133,30 +123,6 @@ public class DocStoreResource {
      * or with status {@code 500 (Internal Server Error)} if the docStoreDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/doc-stores/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<DocStoreDTO> partialUpdateDocStore(
-        @PathVariable(value = "id", required = false) final Long id,
-        @NotNull @RequestBody DocStoreDTO docStoreDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to partial update DocStore partially : {}, {}", id, docStoreDTO);
-        if (docStoreDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, docStoreDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!docStoreRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
-
-        Optional<DocStoreDTO> result = docStoreService.partialUpdate(docStoreDTO);
-
-        return ResponseUtil.wrapOrNotFound(
-            result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, docStoreDTO.getId().toString())
-        );
-    }
 
     /**
      * {@code GET  /doc-stores} : get all the docStores.
@@ -182,11 +148,6 @@ public class DocStoreResource {
      * @param criteria the criteria which the requested entities should match.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the count in body.
      */
-    @GetMapping("/doc-stores/count")
-    public ResponseEntity<Long> countDocStores(DocStoreCriteria criteria) {
-        log.debug("REST request to count DocStores by criteria: {}", criteria);
-        return ResponseEntity.ok().body(docStoreQueryService.countByCriteria(criteria));
-    }
 
     /**
      * {@code GET  /doc-stores/:id} : get the "id" docStore.
@@ -207,9 +168,13 @@ public class DocStoreResource {
      * @param id the id of the docStoreDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
+    @Secured({ Constants.ADMIN })
     @DeleteMapping("/doc-stores/{id}")
     public ResponseEntity<Void> deleteDocStore(@PathVariable Long id) {
         log.debug("REST request to delete DocStore : {}", id);
+        docColValueStoreRepository.deleteAllByDocStoreId(id);
+        docColNameStoreRepository.deleteAllByDocStoreId(id);
+        docStoreAccessAuditRepository.deleteAllByDocStoreId(id);
         docStoreService.delete(id);
         return ResponseEntity
             .noContent()

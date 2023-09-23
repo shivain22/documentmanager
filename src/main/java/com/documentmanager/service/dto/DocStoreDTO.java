@@ -25,7 +25,7 @@ public class DocStoreDTO implements Serializable {
     @NotNull
     @Min(value = 0)
     @Max(value = 2)
-    private Integer process_status = 0;
+    private Integer processStatus;
 
     private UserDTO user;
 
@@ -61,12 +61,12 @@ public class DocStoreDTO implements Serializable {
         this.fileObjectContentType = fileObjectContentType;
     }
 
-    public Integer getProcess_status() {
-        return process_status;
+    public Integer getProcessStatus() {
+        return processStatus;
     }
 
-    public void setProcess_status(Integer process_status) {
-        this.process_status = process_status;
+    public void setProcessStatus(Integer processStatus) {
+        this.processStatus = processStatus;
     }
 
     public UserDTO getUser() {
@@ -105,7 +105,7 @@ public class DocStoreDTO implements Serializable {
             "id=" + getId() +
             ", fileName='" + getFileName() + "'" +
             ", fileObject='" + getFileObject() + "'" +
-            ", process_status=" + getProcess_status() +
+            ", process_status=" + getProcessStatus() +
             ", user=" + getUser() +
             "}";
     }

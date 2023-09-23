@@ -10,6 +10,11 @@ public final class Constants {
 
     public static final String SYSTEM = "system";
     public static final String DEFAULT_LANGUAGE = "en";
+    public static final String ADMIN = "ROLE_ADMIN";
+    public static final String USER = "ROLE_USER";
+    public static final int FILE_UPLOADED = 0;
+    public static final int FILE_UNDER_PROCESS = 1;
+    public static final int FILE_PROCESSED = 2;
 
     private Constants() {}
 }

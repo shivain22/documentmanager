@@ -6,7 +6,7 @@ import java.io.Serializable;
 /**
  * A DTO representing a user, with only the public attributes.
  */
-public class UserDTO implements Serializable {
+public class UserDTO extends AbstractDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

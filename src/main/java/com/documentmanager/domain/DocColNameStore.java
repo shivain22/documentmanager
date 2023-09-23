@@ -28,7 +28,7 @@ public class DocColNameStore extends AbstractAuditingEntity<Long> implements Ser
     @Column(name = "col_name", length = 150, nullable = false)
     private String colName;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.ALL)
     @NotNull
     @JsonIgnoreProperties(value = { "user" }, allowSetters = true)
     private DocStore docStore;

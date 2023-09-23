@@ -87,30 +87,13 @@ public class DocColValueStoreQueryService extends QueryService<DocColValueStore>
         Specification<DocColValueStore> specification = Specification.where(null);
         if (criteria != null) {
             // This has to be called first, because the distinct method returns null
-            if (criteria.getDistinct() != null) {
-                specification = specification.and(distinct(criteria.getDistinct()));
-            }
-            if (criteria.getId() != null) {
-                specification = specification.and(buildRangeSpecification(criteria.getId(), DocColValueStore_.id));
-            }
-            if (criteria.getColValue() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getColValue(), DocColValueStore_.colValue));
-            }
+
             if (criteria.getDocStoreId() != null) {
                 specification =
                     specification.and(
                         buildSpecification(
                             criteria.getDocStoreId(),
                             root -> root.join(DocColValueStore_.docStore, JoinType.LEFT).get(DocStore_.id)
-                        )
-                    );
-            }
-            if (criteria.getDocColNameStoreId() != null) {
-                specification =
-                    specification.and(
-                        buildSpecification(
-                            criteria.getDocColNameStoreId(),
-                            root -> root.join(DocColValueStore_.docColNameStore, JoinType.LEFT).get(DocColNameStore_.id)
                         )
                     );
             }

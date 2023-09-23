@@ -21,59 +21,17 @@ public class DocColValueStoreCriteria implements Serializable, Criteria {
 
     private static final long serialVersionUID = 1L;
 
-    private LongFilter id;
-
-    private StringFilter colValue;
-
     private LongFilter docStoreId;
-
-    private LongFilter docColNameStoreId;
-
-    private Boolean distinct;
 
     public DocColValueStoreCriteria() {}
 
     public DocColValueStoreCriteria(DocColValueStoreCriteria other) {
-        this.id = other.id == null ? null : other.id.copy();
-        this.colValue = other.colValue == null ? null : other.colValue.copy();
         this.docStoreId = other.docStoreId == null ? null : other.docStoreId.copy();
-        this.docColNameStoreId = other.docColNameStoreId == null ? null : other.docColNameStoreId.copy();
-        this.distinct = other.distinct;
     }
 
     @Override
     public DocColValueStoreCriteria copy() {
         return new DocColValueStoreCriteria(this);
-    }
-
-    public LongFilter getId() {
-        return id;
-    }
-
-    public LongFilter id() {
-        if (id == null) {
-            id = new LongFilter();
-        }
-        return id;
-    }
-
-    public void setId(LongFilter id) {
-        this.id = id;
-    }
-
-    public StringFilter getColValue() {
-        return colValue;
-    }
-
-    public StringFilter colValue() {
-        if (colValue == null) {
-            colValue = new StringFilter();
-        }
-        return colValue;
-    }
-
-    public void setColValue(StringFilter colValue) {
-        this.colValue = colValue;
     }
 
     public LongFilter getDocStoreId() {
@@ -91,29 +49,6 @@ public class DocColValueStoreCriteria implements Serializable, Criteria {
         this.docStoreId = docStoreId;
     }
 
-    public LongFilter getDocColNameStoreId() {
-        return docColNameStoreId;
-    }
-
-    public LongFilter docColNameStoreId() {
-        if (docColNameStoreId == null) {
-            docColNameStoreId = new LongFilter();
-        }
-        return docColNameStoreId;
-    }
-
-    public void setDocColNameStoreId(LongFilter docColNameStoreId) {
-        this.docColNameStoreId = docColNameStoreId;
-    }
-
-    public Boolean getDistinct() {
-        return distinct;
-    }
-
-    public void setDistinct(Boolean distinct) {
-        this.distinct = distinct;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -123,29 +58,21 @@ public class DocColValueStoreCriteria implements Serializable, Criteria {
             return false;
         }
         final DocColValueStoreCriteria that = (DocColValueStoreCriteria) o;
-        return (
-            Objects.equals(id, that.id) &&
-            Objects.equals(colValue, that.colValue) &&
-            Objects.equals(docStoreId, that.docStoreId) &&
-            Objects.equals(docColNameStoreId, that.docColNameStoreId) &&
-            Objects.equals(distinct, that.distinct)
-        );
+        return (Objects.equals(docStoreId, that.docStoreId));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, colValue, docStoreId, docColNameStoreId, distinct);
+        return Objects.hash(docStoreId);
     }
 
     // prettier-ignore
     @Override
     public String toString() {
         return "DocColValueStoreCriteria{" +
-            (id != null ? "id=" + id + ", " : "") +
-            (colValue != null ? "colValue=" + colValue + ", " : "") +
+
             (docStoreId != null ? "docStoreId=" + docStoreId + ", " : "") +
-            (docColNameStoreId != null ? "docColNameStoreId=" + docColNameStoreId + ", " : "") +
-            (distinct != null ? "distinct=" + distinct + ", " : "") +
+
             "}";
     }
 }

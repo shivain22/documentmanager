@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Spring Data JPA repository for the DocStore entity.
@@ -40,4 +42,9 @@ public interface DocStoreRepository extends JpaRepository<DocStore, Long>, JpaSp
 
     @Query("select docStore from DocStore docStore left join fetch docStore.user where docStore.id =:id")
     Optional<DocStore> findOneWithToOneRelationships(@Param("id") Long id);
+
+    @Modifying
+    @Query(value = "update doc_store set process_status = ?2 where id=?1", nativeQuery = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    void updateProcessStatus(Long docStoreId, Integer processStatus);
 }

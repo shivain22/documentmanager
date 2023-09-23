@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row, Col, FormText } from 'reactstrap';
-import { isNumber, ValidatedField, ValidatedForm, ValidatedBlobField } from 'react-jhipster';
+import { isNumber, ValidatedField, ValidatedForm } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { convertDateTimeFromServer, convertDateTimeToServer, displayDefaultDateTime } from 'app/shared/util/date-utils';
@@ -11,9 +11,11 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { IUser } from 'app/shared/model/user.model';
 import { getUsers } from 'app/shared/reducers/user-management';
 import { IDocStore } from 'app/shared/model/doc-store.model';
-import { getEntity, updateEntity, createEntity, reset } from './doc-store.reducer';
+import { getEntities as getDocStores } from 'app/entities/doc-store/doc-store.reducer';
+import { IDocStoreAccessAudit } from 'app/shared/model/doc-store-access-audit.model';
+import { getEntity, updateEntity, createEntity, reset } from './doc-store-access-audit.reducer';
 
-export const DocStoreUpdate = () => {
+export const DocStoreAccessAuditUpdate = () => {
   const dispatch = useAppDispatch();
 
   const navigate = useNavigate();
@@ -22,13 +24,14 @@ export const DocStoreUpdate = () => {
   const isNew = id === undefined;
 
   const users = useAppSelector(state => state.userManagement.users);
-  const docStoreEntity = useAppSelector(state => state.docStore.entity);
-  const loading = useAppSelector(state => state.docStore.loading);
-  const updating = useAppSelector(state => state.docStore.updating);
-  const updateSuccess = useAppSelector(state => state.docStore.updateSuccess);
+  const docStores = useAppSelector(state => state.docStore.entities);
+  const docStoreAccessAuditEntity = useAppSelector(state => state.docStoreAccessAudit.entity);
+  const loading = useAppSelector(state => state.docStoreAccessAudit.loading);
+  const updating = useAppSelector(state => state.docStoreAccessAudit.updating);
+  const updateSuccess = useAppSelector(state => state.docStoreAccessAudit.updateSuccess);
 
   const handleClose = () => {
-    navigate('/doc-store');
+    navigate('/doc-store-access-audit');
   };
 
   useEffect(() => {
@@ -37,6 +40,7 @@ export const DocStoreUpdate = () => {
     }
 
     dispatch(getUsers({}));
+    dispatch(getDocStores({}));
   }, []);
 
   useEffect(() => {
@@ -47,9 +51,10 @@ export const DocStoreUpdate = () => {
 
   const saveEntity = values => {
     const entity = {
-      ...docStoreEntity,
+      ...docStoreAccessAuditEntity,
       ...values,
       user: users.find(it => it.id.toString() === values.user.toString()),
+      docStore: docStores.find(it => it.id.toString() === values.docStore.toString()),
     };
 
     if (isNew) {
@@ -63,16 +68,17 @@ export const DocStoreUpdate = () => {
     isNew
       ? {}
       : {
-          ...docStoreEntity,
-          user: docStoreEntity?.user?.id,
+          ...docStoreAccessAuditEntity,
+          user: docStoreAccessAuditEntity?.user?.id,
+          docStore: docStoreAccessAuditEntity?.docStore?.id,
         };
 
   return (
     <div>
       <Row className="justify-content-center">
         <Col md="8">
-          <h2 id="documentmanagerApp.docStore.home.createOrEditLabel" data-cy="DocStoreCreateUpdateHeading">
-            Create or edit a Doc Store
+          <h2 id="documentmanagerApp.docStoreAccessAudit.home.createOrEditLabel" data-cy="DocStoreAccessAuditCreateUpdateHeading">
+            Create or edit a Doc Store Access Audit
           </h2>
         </Col>
       </Row>
@@ -82,43 +88,10 @@ export const DocStoreUpdate = () => {
             <p>Loading...</p>
           ) : (
             <ValidatedForm defaultValues={defaultValues()} onSubmit={saveEntity}>
-              {!isNew ? <ValidatedField name="id" required readOnly id="doc-store-id" label="ID" validate={{ required: true }} /> : null}
-              <ValidatedField
-                label="File Name"
-                id="doc-store-fileName"
-                name="fileName"
-                data-cy="fileName"
-                type="text"
-                validate={{
-                  required: { value: true, message: 'This field is required.' },
-                  minLength: { value: 1, message: 'This field is required to be at least 1 characters.' },
-                  maxLength: { value: 100, message: 'This field cannot be longer than 100 characters.' },
-                }}
-              />
-              <ValidatedBlobField
-                label="File Object"
-                id="doc-store-fileObject"
-                name="fileObject"
-                data-cy="fileObject"
-                openActionLabel="Open"
-                validate={{
-                  required: { value: true, message: 'This field is required.' },
-                }}
-              />
-              <ValidatedField
-                label="Process Status"
-                id="doc-store-process_status"
-                name="processStatus"
-                data-cy="process_status"
-                type="text"
-                validate={{
-                  required: { value: true, message: 'This field is required.' },
-                  min: { value: 0, message: 'This field should be at least 0.' },
-                  max: { value: 2, message: 'This field cannot be more than 2.' },
-                  validate: v => isNumber(v) || 'This field should be a number.',
-                }}
-              />
-              <ValidatedField id="doc-store-user" name="user" data-cy="user" label="User" type="select" required>
+              {!isNew ? (
+                <ValidatedField name="id" required readOnly id="doc-store-access-audit-id" label="ID" validate={{ required: true }} />
+              ) : null}
+              <ValidatedField id="doc-store-access-audit-user" name="user" data-cy="user" label="User" type="select" required>
                 <option value="" key="0" />
                 {users
                   ? users.map(otherEntity => (
@@ -129,7 +102,25 @@ export const DocStoreUpdate = () => {
                   : null}
               </ValidatedField>
               <FormText>This field is required.</FormText>
-              <Button tag={Link} id="cancel-save" data-cy="entityCreateCancelButton" to="/doc-store" replace color="info">
+              <ValidatedField
+                id="doc-store-access-audit-docStore"
+                name="docStore"
+                data-cy="docStore"
+                label="Doc Store"
+                type="select"
+                required
+              >
+                <option value="" key="0" />
+                {docStores
+                  ? docStores.map(otherEntity => (
+                      <option value={otherEntity.id} key={otherEntity.id}>
+                        {otherEntity.id}
+                      </option>
+                    ))
+                  : null}
+              </ValidatedField>
+              <FormText>This field is required.</FormText>
+              <Button tag={Link} id="cancel-save" data-cy="entityCreateCancelButton" to="/doc-store-access-audit" replace color="info">
                 <FontAwesomeIcon icon="arrow-left" />
                 &nbsp;
                 <span className="d-none d-md-inline">Back</span>
@@ -147,4 +138,4 @@ export const DocStoreUpdate = () => {
   );
 };
 
-export default DocStoreUpdate;
+export default DocStoreAccessAuditUpdate;

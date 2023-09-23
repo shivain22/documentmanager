@@ -1,27 +1,20 @@
 package com.documentmanager.service.impl;
 
+import com.documentmanager.config.Constants;
 import com.documentmanager.domain.DocColNameStore;
 import com.documentmanager.domain.DocColValueStore;
 import com.documentmanager.domain.DocStore;
 import com.documentmanager.repository.DocColNameStoreRepository;
 import com.documentmanager.repository.DocColValueStoreRepository;
 import com.documentmanager.repository.DocStoreRepository;
-import com.documentmanager.service.DocColNameStoreService;
-import com.documentmanager.service.DocColValueStoreService;
 import com.documentmanager.service.dto.DocStoreDTO;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,16 +42,12 @@ public class DocProcessor implements Runnable {
     @Autowired
     DocStoreRepository docStoreRepository;
 
-    @Autowired
-    DocColNameStoreService docColNameStoreService;
-
-    @Autowired
-    DocColValueStoreService docValueStoreService;
-
     @Override
     public void run() {
         try {
-            docStore = docStoreRepository.getById(docStoreDTO.getId());
+            docStore = docStoreRepository.findById(docStoreDTO.getId()).get();
+            docStoreRepository.updateProcessStatus(docStore.getId(), Constants.FILE_UNDER_PROCESS);
+            System.out.println(docStore.getId());
             long start = System.currentTimeMillis();
             InputStream stream = new ByteArrayInputStream(docStoreDTO.getFileObject());
             Workbook workbook = WorkbookFactory.create(stream);
@@ -67,7 +56,7 @@ public class DocProcessor implements Runnable {
             int rowCount = 0;
             int colCount = 0;
             List<DocColNameStore> docColNameStoreList = new LinkedList<>();
-            List<DocColValueStore> docValueStoreList = new LinkedList<>();
+            List<DocColValueStore> docColValueStoreList = new LinkedList<>();
             while (rowIterator.hasNext()) {
                 Row nextRow = rowIterator.next();
                 Iterator<Cell> cellIterator = nextRow.cellIterator();
@@ -87,16 +76,18 @@ public class DocProcessor implements Runnable {
                         docColValueStore.setDocStore(docStore);
                         docColValueStore.setDocColNameStore(docColNameStoreList.get(columnIndex));
                         docColValueStore.setColValue(strValue);
-                        docValueStoreList.add(docColValueStore);
+                        docColValueStoreList.add(docColValueStore);
                     }
                 }
                 if (rowCount == 0) {
-                    docColNameStoreRepository.saveAll(docColNameStoreList);
+                    docStore.setDocColNameStores(docColNameStoreList);
                 } else {
-                    docColValueStoreRepository.saveAll(docValueStoreList);
+                    docStore.setDocColValueStores(docColValueStoreList);
                 }
                 rowCount++;
             }
+            docStoreRepository.save(docStore);
+            docStoreRepository.updateProcessStatus(docStore.getId(), Constants.FILE_PROCESSED);
             workbook.close();
             long end = System.currentTimeMillis();
             System.out.printf("Import done in %d ms\n", (end - start));

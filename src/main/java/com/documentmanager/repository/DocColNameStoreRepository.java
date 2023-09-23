@@ -9,4 +9,8 @@ import org.springframework.stereotype.Repository;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface DocColNameStoreRepository extends JpaRepository<DocColNameStore, Long>, JpaSpecificationExecutor<DocColNameStore> {}
+public interface DocColNameStoreRepository extends JpaRepository<DocColNameStore, Long>, JpaSpecificationExecutor<DocColNameStore> {
+    @Modifying
+    @Query(value = "delete from doc_col_name_store where doc_store_id=?1", nativeQuery = true)
+    void deleteAllByDocStoreId(Long docStoreId);
+}

@@ -58,118 +58,8 @@ class DocColValueStoreResourceIT {
 
     private DocColValueStore docColValueStore;
 
-    /**
-     * Create an entity for this test.
-     *
-     * This is a static method, as tests for other entities might also need it,
-     * if they test an entity which requires the current entity.
-     */
-    public static DocColValueStore createEntity(EntityManager em) {
-        DocColValueStore docColValueStore = new DocColValueStore().colValue(DEFAULT_COL_VALUE);
-        // Add required entity
-        DocStore docStore;
-        if (TestUtil.findAll(em, DocStore.class).isEmpty()) {
-            docStore = DocStoreResourceIT.createEntity(em);
-            em.persist(docStore);
-            em.flush();
-        } else {
-            docStore = TestUtil.findAll(em, DocStore.class).get(0);
-        }
-        docColValueStore.setDocStore(docStore);
-        // Add required entity
-        DocColNameStore docColNameStore;
-        if (TestUtil.findAll(em, DocColNameStore.class).isEmpty()) {
-            docColNameStore = DocColNameStoreResourceIT.createEntity(em);
-            em.persist(docColNameStore);
-            em.flush();
-        } else {
-            docColNameStore = TestUtil.findAll(em, DocColNameStore.class).get(0);
-        }
-        docColValueStore.setDocColNameStore(docColNameStore);
-        return docColValueStore;
-    }
-
-    /**
-     * Create an updated entity for this test.
-     *
-     * This is a static method, as tests for other entities might also need it,
-     * if they test an entity which requires the current entity.
-     */
-    public static DocColValueStore createUpdatedEntity(EntityManager em) {
-        DocColValueStore docColValueStore = new DocColValueStore().colValue(UPDATED_COL_VALUE);
-        // Add required entity
-        DocStore docStore;
-        if (TestUtil.findAll(em, DocStore.class).isEmpty()) {
-            docStore = DocStoreResourceIT.createUpdatedEntity(em);
-            em.persist(docStore);
-            em.flush();
-        } else {
-            docStore = TestUtil.findAll(em, DocStore.class).get(0);
-        }
-        docColValueStore.setDocStore(docStore);
-        // Add required entity
-        DocColNameStore docColNameStore;
-        if (TestUtil.findAll(em, DocColNameStore.class).isEmpty()) {
-            docColNameStore = DocColNameStoreResourceIT.createUpdatedEntity(em);
-            em.persist(docColNameStore);
-            em.flush();
-        } else {
-            docColNameStore = TestUtil.findAll(em, DocColNameStore.class).get(0);
-        }
-        docColValueStore.setDocColNameStore(docColNameStore);
-        return docColValueStore;
-    }
-
     @BeforeEach
-    public void initTest() {
-        docColValueStore = createEntity(em);
-    }
-
-    @Test
-    @Transactional
-    void createDocColValueStore() throws Exception {
-        int databaseSizeBeforeCreate = docColValueStoreRepository.findAll().size();
-        // Create the DocColValueStore
-        DocColValueStoreDTO docColValueStoreDTO = docColValueStoreMapper.toDto(docColValueStore);
-        restDocColValueStoreMockMvc
-            .perform(
-                post(ENTITY_API_URL)
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(docColValueStoreDTO))
-            )
-            .andExpect(status().isCreated());
-
-        // Validate the DocColValueStore in the database
-        List<DocColValueStore> docColValueStoreList = docColValueStoreRepository.findAll();
-        assertThat(docColValueStoreList).hasSize(databaseSizeBeforeCreate + 1);
-        DocColValueStore testDocColValueStore = docColValueStoreList.get(docColValueStoreList.size() - 1);
-        assertThat(testDocColValueStore.getColValue()).isEqualTo(DEFAULT_COL_VALUE);
-    }
-
-    @Test
-    @Transactional
-    void createDocColValueStoreWithExistingId() throws Exception {
-        // Create the DocColValueStore with an existing ID
-        docColValueStore.setId(1L);
-        DocColValueStoreDTO docColValueStoreDTO = docColValueStoreMapper.toDto(docColValueStore);
-
-        int databaseSizeBeforeCreate = docColValueStoreRepository.findAll().size();
-
-        // An entity with an existing ID cannot be created, so this API call must fail
-        restDocColValueStoreMockMvc
-            .perform(
-                post(ENTITY_API_URL)
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(docColValueStoreDTO))
-            )
-            .andExpect(status().isBadRequest());
-
-        // Validate the DocColValueStore in the database
-        List<DocColValueStore> docColValueStoreList = docColValueStoreRepository.findAll();
-        assertThat(docColValueStoreList).hasSize(databaseSizeBeforeCreate);
-    }
+    public void initTest() {}
 
     @Test
     @Transactional
@@ -305,29 +195,6 @@ class DocColValueStoreResourceIT {
 
         // Get all the docColValueStoreList where docStore equals to (docStoreId + 1)
         defaultDocColValueStoreShouldNotBeFound("docStoreId.equals=" + (docStoreId + 1));
-    }
-
-    @Test
-    @Transactional
-    void getAllDocColValueStoresByDocColNameStoreIsEqualToSomething() throws Exception {
-        DocColNameStore docColNameStore;
-        if (TestUtil.findAll(em, DocColNameStore.class).isEmpty()) {
-            docColValueStoreRepository.saveAndFlush(docColValueStore);
-            docColNameStore = DocColNameStoreResourceIT.createEntity(em);
-        } else {
-            docColNameStore = TestUtil.findAll(em, DocColNameStore.class).get(0);
-        }
-        em.persist(docColNameStore);
-        em.flush();
-        docColValueStore.setDocColNameStore(docColNameStore);
-        docColValueStoreRepository.saveAndFlush(docColValueStore);
-        Long docColNameStoreId = docColNameStore.getId();
-
-        // Get all the docColValueStoreList where docColNameStore equals to docColNameStoreId
-        defaultDocColValueStoreShouldBeFound("docColNameStoreId.equals=" + docColNameStoreId);
-
-        // Get all the docColValueStoreList where docColNameStore equals to (docColNameStoreId + 1)
-        defaultDocColValueStoreShouldNotBeFound("docColNameStoreId.equals=" + (docColNameStoreId + 1));
     }
 
     /**

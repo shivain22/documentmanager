@@ -8,13 +8,13 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
- * A DocColValueStore.
+ * A DocStoreAccessAudit.
  */
 @Entity
-@Table(name = "doc_col_value_store")
+@Table(name = "doc_store_access_audit")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @SuppressWarnings("common-java:DuplicatedBlocks")
-public class DocColValueStore extends AbstractAuditingEntity<Long> implements Serializable {
+public class DocStoreAccessAudit extends AbstractAuditingEntity<Long> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -23,18 +23,14 @@ public class DocColValueStore extends AbstractAuditingEntity<Long> implements Se
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "col_value")
-    private String colValue;
+    @ManyToOne(optional = false)
+    @NotNull
+    private User user;
 
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(optional = false)
     @NotNull
     @JsonIgnoreProperties(value = { "user" }, allowSetters = true)
     private DocStore docStore;
-
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
-    @NotNull
-    @JsonIgnoreProperties(value = { "docStore" }, allowSetters = true)
-    private DocColNameStore docColNameStore;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
@@ -42,7 +38,7 @@ public class DocColValueStore extends AbstractAuditingEntity<Long> implements Se
         return this.id;
     }
 
-    public DocColValueStore id(Long id) {
+    public DocStoreAccessAudit id(Long id) {
         this.setId(id);
         return this;
     }
@@ -51,17 +47,17 @@ public class DocColValueStore extends AbstractAuditingEntity<Long> implements Se
         this.id = id;
     }
 
-    public String getColValue() {
-        return this.colValue;
+    public User getUser() {
+        return this.user;
     }
 
-    public DocColValueStore colValue(String colValue) {
-        this.setColValue(colValue);
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public DocStoreAccessAudit user(User user) {
+        this.setUser(user);
         return this;
-    }
-
-    public void setColValue(String colValue) {
-        this.colValue = colValue;
     }
 
     public DocStore getDocStore() {
@@ -72,21 +68,8 @@ public class DocColValueStore extends AbstractAuditingEntity<Long> implements Se
         this.docStore = docStore;
     }
 
-    public DocColValueStore docStore(DocStore docStore) {
+    public DocStoreAccessAudit docStore(DocStore docStore) {
         this.setDocStore(docStore);
-        return this;
-    }
-
-    public DocColNameStore getDocColNameStore() {
-        return this.docColNameStore;
-    }
-
-    public void setDocColNameStore(DocColNameStore docColNameStore) {
-        this.docColNameStore = docColNameStore;
-    }
-
-    public DocColValueStore docColNameStore(DocColNameStore docColNameStore) {
-        this.setDocColNameStore(docColNameStore);
         return this;
     }
 
@@ -97,10 +80,10 @@ public class DocColValueStore extends AbstractAuditingEntity<Long> implements Se
         if (this == o) {
             return true;
         }
-        if (!(o instanceof DocColValueStore)) {
+        if (!(o instanceof DocStoreAccessAudit)) {
             return false;
         }
-        return id != null && id.equals(((DocColValueStore) o).id);
+        return id != null && id.equals(((DocStoreAccessAudit) o).id);
     }
 
     @Override
@@ -112,9 +95,8 @@ public class DocColValueStore extends AbstractAuditingEntity<Long> implements Se
     // prettier-ignore
     @Override
     public String toString() {
-        return "DocColValueStore{" +
+        return "DocStoreAccessAudit{" +
             "id=" + getId() +
-            ", colValue='" + getColValue() + "'" +
             "}";
     }
 }

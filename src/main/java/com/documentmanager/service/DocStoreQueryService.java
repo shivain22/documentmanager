@@ -84,23 +84,8 @@ public class DocStoreQueryService extends QueryService<DocStore> {
         Specification<DocStore> specification = Specification.where(null);
         if (criteria != null) {
             // This has to be called first, because the distinct method returns null
-            if (criteria.getDistinct() != null) {
-                specification = specification.and(distinct(criteria.getDistinct()));
-            }
             if (criteria.getId() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getId(), DocStore_.id));
-            }
-            if (criteria.getFileName() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getFileName(), DocStore_.fileName));
-            }
-            if (criteria.getProcess_status() != null) {
-                specification = specification.and(buildRangeSpecification(criteria.getProcess_status(), DocStore_.process_status));
-            }
-            if (criteria.getUserId() != null) {
-                specification =
-                    specification.and(
-                        buildSpecification(criteria.getUserId(), root -> root.join(DocStore_.user, JoinType.LEFT).get(User_.id))
-                    );
             }
         }
         return specification;

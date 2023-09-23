@@ -1,12 +1,14 @@
 package com.documentmanager.domain;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.RelationTargetAuditMode;
 
 /**
  * A DocStore.
@@ -14,9 +16,8 @@ import org.hibernate.envers.RelationTargetAuditMode;
 @Entity
 @Table(name = "doc_store")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 @SuppressWarnings("common-java:DuplicatedBlocks")
-public class DocStore extends AbstractAuditingEntity<Long> implements Serializable {
+public class DocStore implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -42,11 +43,33 @@ public class DocStore extends AbstractAuditingEntity<Long> implements Serializab
     @Min(value = 0)
     @Max(value = 2)
     @Column(name = "process_status", nullable = false)
-    private Integer process_status = 0;
+    private Integer processStatus;
 
     @ManyToOne(optional = false)
     @NotNull
     private User user;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "docStore", orphanRemoval = true)
+    List<DocColNameStore> docColNameStores = new LinkedList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "docStore", orphanRemoval = true)
+    List<DocColValueStore> docColValueStores = new LinkedList<>();
+
+    public List<DocColNameStore> getDocColNameStores() {
+        return docColNameStores;
+    }
+
+    public void setDocColNameStores(List<DocColNameStore> docColNameStores) {
+        this.docColNameStores = docColNameStores;
+    }
+
+    public List<DocColValueStore> getDocColValueStores() {
+        return docColValueStores;
+    }
+
+    public void setDocColValueStores(List<DocColValueStore> docColValueStores) {
+        this.docColValueStores = docColValueStores;
+    }
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
@@ -98,21 +121,21 @@ public class DocStore extends AbstractAuditingEntity<Long> implements Serializab
         return this;
     }
 
+    public DocStore processStatus(Integer processStatus) {
+        this.processStatus = processStatus;
+        return this;
+    }
+
     public void setFileObjectContentType(String fileObjectContentType) {
         this.fileObjectContentType = fileObjectContentType;
     }
 
-    public Integer getProcess_status() {
-        return this.process_status;
+    public Integer getProcessStatus() {
+        return processStatus;
     }
 
-    public DocStore process_status(Integer process_status) {
-        this.setProcess_status(process_status);
-        return this;
-    }
-
-    public void setProcess_status(Integer process_status) {
-        this.process_status = process_status;
+    public void setProcessStatus(Integer processStatus) {
+        this.processStatus = processStatus;
     }
 
     public User getUser() {
@@ -155,7 +178,7 @@ public class DocStore extends AbstractAuditingEntity<Long> implements Serializab
             ", fileName='" + getFileName() + "'" +
             ", fileObject='" + getFileObject() + "'" +
             ", fileObjectContentType='" + getFileObjectContentType() + "'" +
-            ", process_status=" + getProcess_status() +
+            ", process_status=" + getProcessStatus() +
             "}";
     }
 }

@@ -20,10 +20,12 @@ public interface DocColValueStoreMapper extends EntityMapper<DocColValueStoreDTO
     @Named("docStoreId")
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")
+    @Mapping(target = "fileName", source = "fileName")
     DocStoreDTO toDtoDocStoreId(DocStore docStore);
 
     @Named("docColNameStoreId")
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")
+    @Mapping(target = "colName", source = "colName")
     DocColNameStoreDTO toDtoDocColNameStoreId(DocColNameStore docColNameStore);
 }

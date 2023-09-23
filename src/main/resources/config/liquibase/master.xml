@@ -14,6 +14,7 @@
     <include file="config/liquibase/changelog/20230923065705_added_entity_DocStore.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20230923090857_added_entity_DocColNameStore.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20230923091452_added_entity_DocColValueStore.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20230923104603_added_entity_DocStoreAccessAudit.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <include file="config/liquibase/changelog/20230923065705_added_entity_constraints_DocStore.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20230923090857_added_entity_constraints_DocColNameStore.xml" relativeToChangelogFile="false"/>
@@ -24,6 +25,9 @@
     <include file="config/liquibase/changelog/20230923091452_added_cols_DocColValueStore.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20230923091452_added_entity_DocStoreAud.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20230923091452_added_entity_RevInfo.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20230923091452_added_cols_DocStoreAccessAudit.xml" relativeToChangelogFile="false"/>
+
+    <include file="config/liquibase/changelog/20230923104603_added_entity_constraints_DocStoreAccessAudit.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
     <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->
 </databaseChangeLog>
