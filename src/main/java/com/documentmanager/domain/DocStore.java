@@ -5,6 +5,8 @@ import javax.persistence.*;
 import javax.validation.constraints.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.envers.Audited;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * A DocStore.
@@ -12,6 +14,8 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Table(name = "doc_store")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+//@EntityListeners(AuditingEntityListener.class)
+//@Audited
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class DocStore implements Serializable {
 

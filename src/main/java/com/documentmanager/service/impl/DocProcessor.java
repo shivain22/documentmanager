@@ -45,6 +45,7 @@ public class DocProcessor implements Runnable {
                     DataFormatter formatter = new DataFormatter();
                     String strValue = formatter.formatCellValue(nextCell);
                 }
+                count++;
             }
             workbook.close();
             long end = System.currentTimeMillis();
