@@ -5,6 +5,7 @@ import javax.persistence.*;
 import javax.validation.constraints.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.envers.Audited;
 
 /**
  * A DocStore.
@@ -12,8 +13,9 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Table(name = "doc_store")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Audited
 @SuppressWarnings("common-java:DuplicatedBlocks")
-public class DocStore implements Serializable {
+public class DocStore extends AbstractAuditingEntity<Long> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

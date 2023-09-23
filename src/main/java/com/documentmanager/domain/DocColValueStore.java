@@ -14,7 +14,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Table(name = "doc_col_value_store")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @SuppressWarnings("common-java:DuplicatedBlocks")
-public class DocColValueStore implements Serializable {
+public class DocColValueStore extends AbstractAuditingEntity<Long> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
