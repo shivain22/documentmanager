@@ -5,16 +5,12 @@ import com.documentmanager.repository.DocStoreRepository;
 import com.documentmanager.service.DocStoreService;
 import com.documentmanager.service.dto.DocStoreDTO;
 import com.documentmanager.service.mapper.DocStoreMapper;
-import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -90,9 +86,6 @@ public class DocStoreServiceImpl implements DocStoreService {
         docStoreRepository.deleteById(id);
     }
 
-    @Modifying
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Query(value = "create table ", nativeQuery = true)
-    @Override
-    public void createTable(String tableName, List<String> colNames) {}
+
+
 }

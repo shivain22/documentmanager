@@ -5,12 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class DocStoreMapperTest {
+class DocColValueStoreMapperTest {
 
-    private DocStoreMapper docStoreMapper;
+    private DocColValueStoreMapper docColValueStoreMapper;
 
     @BeforeEach
     public void setUp() {
-        docStoreMapper = new DocStoreMapperImpl();
+        docColValueStoreMapper = new DocColValueStoreMapperImpl();
     }
 }

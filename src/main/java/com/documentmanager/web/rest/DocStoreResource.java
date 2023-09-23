@@ -1,11 +1,11 @@
 package com.documentmanager.web.rest;
 
+import com.documentmanager.domain.DocStore;
 import com.documentmanager.repository.DocStoreRepository;
 import com.documentmanager.service.DocStoreQueryService;
 import com.documentmanager.service.DocStoreService;
 import com.documentmanager.service.criteria.DocStoreCriteria;
 import com.documentmanager.service.dto.DocStoreDTO;
-import com.documentmanager.service.impl.DocProcessor;
 import com.documentmanager.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -16,9 +16,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -49,12 +47,6 @@ public class DocStoreResource {
 
     private final DocStoreQueryService docStoreQueryService;
 
-    @Autowired
-    TaskExecutor taskExecutor;
-
-    @Autowired
-    DocProcessor docProcessor;
-
     public DocStoreResource(
         DocStoreService docStoreService,
         DocStoreRepository docStoreRepository,
@@ -79,8 +71,7 @@ public class DocStoreResource {
             throw new BadRequestAlertException("A new docStore cannot already have an ID", ENTITY_NAME, "idexists");
         }
         DocStoreDTO result = docStoreService.save(docStoreDTO);
-        docProcessor.setDocStoreDTO(docStoreDTO);
-        taskExecutor.execute(docProcessor);
+
         return ResponseEntity
             .created(new URI("/api/doc-stores/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))

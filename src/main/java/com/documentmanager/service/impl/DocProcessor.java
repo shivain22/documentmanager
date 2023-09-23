@@ -1,6 +1,13 @@
 package com.documentmanager.service.impl;
 
+import com.documentmanager.domain.DocColNameStore;
+import com.documentmanager.domain.DocColValueStore;
 import com.documentmanager.domain.DocStore;
+import com.documentmanager.repository.DocColNameStoreRepository;
+import com.documentmanager.repository.DocColValueStoreRepository;
+import com.documentmanager.repository.DocStoreRepository;
+import com.documentmanager.service.DocColNameStoreService;
+import com.documentmanager.service.DocColValueStoreService;
 import com.documentmanager.service.dto.DocStoreDTO;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -12,6 +19,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,34 +29,43 @@ import org.springframework.stereotype.Service;
 @Service
 public class DocProcessor implements Runnable {
 
+    DocStore docStore;
+
+
     DocStoreDTO docStoreDTO;
 
-    public DocStoreDTO getDocStoreDTO() {
-        return docStoreDTO;
+    public DocStore getDocStore() {
+        return docStore;
     }
 
-    public void setDocStoreDTO(DocStoreDTO docStoreDTO) {
-        this.docStoreDTO = docStoreDTO;
+    public void setDocStore(DocStore docStore) {
+        this.docStore = docStore;
     }
-
+    @Autowired
+    DocColNameStoreRepository docColNameStoreRepository;
+    @Autowired
+    DocColValueStoreRepository docColValueStoreRepository;
+    @Autowired
+    DocStoreRepository docStoreRepository;
     @Autowired
     DocColNameStoreService docColNameStoreService;
 
     @Autowired
-    DocValueStoreService docValueStoreService;
+    DocColValueStoreService docValueStoreService;
 
     @Override
     public void run() {
         try {
+            docStore = docStoreRepository.getReferenceById(docStoreDTO.getId());
             long start = System.currentTimeMillis();
-            InputStream stream = new ByteArrayInputStream(docStoreDTO.getFileObject());
+            InputStream stream = new ByteArrayInputStream(docStore.getFileObject());
             Workbook workbook = WorkbookFactory.create(stream);
             Sheet firstSheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = firstSheet.iterator();
             int rowCount = 0;
             int colCount = 0;
             List<DocColNameStore> docColNameStoreList = new LinkedList<>();
-            List<DocValueStore> docValueStoreList = new LinkedList<>();
+            List<DocColValueStore> docValueStoreList = new LinkedList<>();
             while (rowIterator.hasNext()) {
                 Row nextRow = rowIterator.next();
                 Iterator<Cell> cellIterator = nextRow.cellIterator();
@@ -58,21 +76,21 @@ public class DocProcessor implements Runnable {
                     String strValue = formatter.formatCellValue(nextCell);
                     if (rowCount == 0) {
                         DocColNameStore docColNameStore = new DocColNameStore();
-                        docColNameStore.setDocStore(docStoreDTO);
+                        docColNameStore.setDocStore(docStore);
                         docColNameStore.setColName(strValue);
-                        colNameStoreList.add(docColNameStore);
+                        docColNameStoreList.add(docColNameStore);
                     } else if (rowCount > 0) {
-                        DocValueStore docValueStore = new DocValueStore();
-                        docValueStore.setDocStore(docStoreDTO);
-                        docValueStore.setDocColStore(docColNameStoreList.get(columnIndex).getId());
-                        docValueStore.setValue(strValue);
-                        docValueStoreList.add(docValueStore);
+                        DocColValueStore docColValueStore = new DocColValueStore();
+                        docColValueStore.setDocStore(docStore);
+                        docColValueStore.setDocColNameStore(docColNameStoreList.get(columnIndex));
+                        docColValueStore.setColValue(strValue);
+                        docValueStoreList.add(docColValueStore);
                     }
                 }
                 if (rowCount == 0) {
-                    docColNameStoreService.saveAll(docColNameStoreList);
+                    docColNameStoreRepository.saveAll(docColNameStoreList);
                 } else {
-                    docValueStoreService.saveAll(docValueStoreList);
+                    docColValueStoreRepository.saveAll(docValueStoreList);
                 }
                 rowCount++;
             }
@@ -83,6 +101,6 @@ public class DocProcessor implements Runnable {
             System.out.println("Error reading file");
             ex1.printStackTrace();
         }
-        docStoreDTO.getFileName();
+        docStore.getFileName();
     }
 }

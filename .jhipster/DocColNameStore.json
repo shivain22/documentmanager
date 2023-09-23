@@ -1,0 +1,27 @@
+{
+  "changelogDate": "20230923090857",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "colName",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "minlength", "maxlength"],
+      "fieldValidateRulesMaxlength": "150",
+      "fieldValidateRulesMinlength": "1"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "DocColNameStore",
+  "pagination": "infinite-scroll",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityField": "id",
+      "otherEntityName": "docStore",
+      "relationshipName": "docStore",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": ["required"]
+    }
+  ],
+  "service": "serviceImpl"
+}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <!--
+        Added the constraints for entity DocColValueStore.
+    -->
+    <changeSet id="20230923091452-2" author="jhipster">
+
+        <addForeignKeyConstraint baseColumnNames="doc_store_id"
+                                 baseTableName="doc_col_value_store"
+                                 constraintName="fk_doc_col_value_store__doc_store_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="doc_store"/>
+
+        <addForeignKeyConstraint baseColumnNames="doc_col_name_store_id"
+                                 baseTableName="doc_col_value_store"
+                                 constraintName="fk_doc_col_value_store__doc_col_name_store_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="doc_col_name_store"/>
+    </changeSet>
+</databaseChangeLog>

@@ -49,6 +49,8 @@ public class CacheConfiguration {
             createCache(cm, com.documentmanager.domain.Authority.class.getName());
             createCache(cm, com.documentmanager.domain.User.class.getName() + ".authorities");
             createCache(cm, com.documentmanager.domain.DocStore.class.getName());
+            createCache(cm, com.documentmanager.domain.DocColNameStore.class.getName());
+            createCache(cm, com.documentmanager.domain.DocColValueStore.class.getName());
             // jhipster-needle-ehcache-add-entry
         };
     }
