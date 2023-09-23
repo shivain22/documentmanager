@@ -6,6 +6,7 @@ import javax.validation.constraints.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 /**
  * A DocStore.
@@ -13,7 +14,7 @@ import org.hibernate.envers.Audited;
 @Entity
 @Table(name = "doc_store")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@Audited
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class DocStore extends AbstractAuditingEntity<Long> implements Serializable {
 

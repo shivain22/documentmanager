@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet author="shiva (generated)" id="1657539087460-2">
+        <createTable tableName="doc_store_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="revtype" type="TINYINT(3)"/>
+            <column name="created_by" type="VARCHAR(50)"/>
+            <column name="created_date" type="datetime"/>
+            <column name="last_modified_by" type="VARCHAR(50)"/>
+            <column name="last_modified_date" type="datetime"/>
+            <column name="file_name" type="varchar(100)"></column>
+            <column name="file_object" type="${blobType}"></column>
+            <column name="file_object_content_type" type="varchar(255)"></column>
+            <column name="process_status" type="integer"></column>
+            <column name="user_id" type="varchar(100)"></column>
+
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
