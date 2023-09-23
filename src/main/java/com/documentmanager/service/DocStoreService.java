@@ -1,6 +1,7 @@
 package com.documentmanager.service;
 
 import com.documentmanager.service.dto.DocStoreDTO;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -63,4 +64,6 @@ public interface DocStoreService {
      * @param id the id of the entity.
      */
     void delete(Long id);
+
+    void createTable(String tableName, List<String> colNames);
 }
