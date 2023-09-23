@@ -14,6 +14,13 @@
       "fieldType": "byte[]",
       "fieldTypeBlobContent": "any",
       "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "process_status",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required", "min", "max"],
+      "fieldValidateRulesMax": "2",
+      "fieldValidateRulesMin": "0"
     }
   ],
   "jpaMetamodelFiltering": true,

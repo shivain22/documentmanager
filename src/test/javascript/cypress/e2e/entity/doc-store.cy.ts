@@ -15,7 +15,7 @@ describe('DocStore e2e test', () => {
   const docStorePageUrlPattern = new RegExp('/doc-store(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'user';
   const password = Cypress.env('E2E_PASSWORD') ?? 'user';
-  // const docStoreSample = {"fileName":"back-end","fileObject":"Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci5wbmc=","fileObjectContentType":"unknown"};
+  // const docStoreSample = {"fileName":"Rubber Sausages United","fileObject":"Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci5wbmc=","fileObjectContentType":"unknown","process_status":2};
 
   let docStore;
   // let user;
@@ -218,6 +218,8 @@ describe('DocStore e2e test', () => {
       cy.get(`[data-cy="fileName"]`).type('state').should('have.value', 'state');
 
       cy.setFieldImageAsBytesOfEntity('fileObject', 'integration-test.png', 'image/png');
+
+      cy.get(`[data-cy="process_status"]`).type('0').should('have.value', '0');
 
       cy.get(`[data-cy="user"]`).select(1);
 

@@ -47,6 +47,10 @@ export const DocStoreDetail = () => {
               </div>
             ) : null}
           </dd>
+          <dt>
+            <span id="process_status">Process Status</span>
+          </dt>
+          <dd>{docStoreEntity.process_status}</dd>
           <dt>User</dt>
           <dd>{docStoreEntity.user ? docStoreEntity.user.login : ''}</dd>
         </dl>

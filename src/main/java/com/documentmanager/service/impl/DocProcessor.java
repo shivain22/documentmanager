@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,22 +30,25 @@ public class DocProcessor implements Runnable {
 
     DocStore docStore;
 
-
     DocStoreDTO docStoreDTO;
 
-    public DocStore getDocStore() {
-        return docStore;
+    public DocStoreDTO getDocStoreDTO() {
+        return docStoreDTO;
     }
 
-    public void setDocStore(DocStore docStore) {
-        this.docStore = docStore;
+    public void setDocStoreDTO(DocStoreDTO docStoreDTO) {
+        this.docStoreDTO = docStoreDTO;
     }
+
     @Autowired
     DocColNameStoreRepository docColNameStoreRepository;
+
     @Autowired
     DocColValueStoreRepository docColValueStoreRepository;
+
     @Autowired
     DocStoreRepository docStoreRepository;
+
     @Autowired
     DocColNameStoreService docColNameStoreService;
 
@@ -56,9 +58,9 @@ public class DocProcessor implements Runnable {
     @Override
     public void run() {
         try {
-            docStore = docStoreRepository.getReferenceById(docStoreDTO.getId());
+            docStore = docStoreRepository.getById(docStoreDTO.getId());
             long start = System.currentTimeMillis();
-            InputStream stream = new ByteArrayInputStream(docStore.getFileObject());
+            InputStream stream = new ByteArrayInputStream(docStoreDTO.getFileObject());
             Workbook workbook = WorkbookFactory.create(stream);
             Sheet firstSheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = firstSheet.iterator();
@@ -74,6 +76,7 @@ public class DocProcessor implements Runnable {
                     int columnIndex = nextCell.getColumnIndex();
                     DataFormatter formatter = new DataFormatter();
                     String strValue = formatter.formatCellValue(nextCell);
+                    System.out.println(strValue);
                     if (rowCount == 0) {
                         DocColNameStore docColNameStore = new DocColNameStore();
                         docColNameStore.setDocStore(docStore);
@@ -101,6 +104,6 @@ public class DocProcessor implements Runnable {
             System.out.println("Error reading file");
             ex1.printStackTrace();
         }
-        docStore.getFileName();
+        docStoreDTO.getFileName();
     }
 }

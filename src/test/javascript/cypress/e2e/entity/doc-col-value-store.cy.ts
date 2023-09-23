@@ -31,7 +31,7 @@ describe('DocColValueStore e2e test', () => {
     cy.authenticatedRequest({
       method: 'POST',
       url: '/api/doc-stores',
-      body: {"fileName":"systems Account Director","fileObject":"Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci5wbmc=","fileObjectContentType":"unknown"},
+      body: {"fileName":"systems Account Director","fileObject":"Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci5wbmc=","fileObjectContentType":"unknown","process_status":2},
     }).then(({ body }) => {
       docStore = body;
     });

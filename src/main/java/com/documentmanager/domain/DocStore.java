@@ -35,6 +35,12 @@ public class DocStore implements Serializable {
     @Column(name = "file_object_content_type", nullable = false)
     private String fileObjectContentType;
 
+    @NotNull
+    @Min(value = 0)
+    @Max(value = 2)
+    @Column(name = "process_status", nullable = false)
+    private Integer process_status = 0;
+
     @ManyToOne(optional = false)
     @NotNull
     private User user;
@@ -93,6 +99,19 @@ public class DocStore implements Serializable {
         this.fileObjectContentType = fileObjectContentType;
     }
 
+    public Integer getProcess_status() {
+        return this.process_status;
+    }
+
+    public DocStore process_status(Integer process_status) {
+        this.setProcess_status(process_status);
+        return this;
+    }
+
+    public void setProcess_status(Integer process_status) {
+        this.process_status = process_status;
+    }
+
     public User getUser() {
         return this.user;
     }
@@ -133,6 +152,7 @@ public class DocStore implements Serializable {
             ", fileName='" + getFileName() + "'" +
             ", fileObject='" + getFileObject() + "'" +
             ", fileObjectContentType='" + getFileObjectContentType() + "'" +
+            ", process_status=" + getProcess_status() +
             "}";
     }
 }

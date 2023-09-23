@@ -30,7 +30,7 @@ describe('DocColNameStore e2e test', () => {
     cy.authenticatedRequest({
       method: 'POST',
       url: '/api/doc-stores',
-      body: {"fileName":"Principal integrate Plastic","fileObject":"Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci5wbmc=","fileObjectContentType":"unknown"},
+      body: {"fileName":"Principal integrate Plastic","fileObject":"Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci5wbmc=","fileObjectContentType":"unknown","process_status":1},
     }).then(({ body }) => {
       docStore = body;
     });

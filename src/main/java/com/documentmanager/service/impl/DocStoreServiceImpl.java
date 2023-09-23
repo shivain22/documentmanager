@@ -85,7 +85,4 @@ public class DocStoreServiceImpl implements DocStoreService {
         log.debug("Request to delete DocStore : {}", id);
         docStoreRepository.deleteById(id);
     }
-
-
-
 }

@@ -93,6 +93,9 @@ public class DocStoreQueryService extends QueryService<DocStore> {
             if (criteria.getFileName() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getFileName(), DocStore_.fileName));
             }
+            if (criteria.getProcess_status() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getProcess_status(), DocStore_.process_status));
+            }
             if (criteria.getUserId() != null) {
                 specification =
                     specification.and(

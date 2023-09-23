@@ -105,6 +105,19 @@ export const DocStoreUpdate = () => {
                   required: { value: true, message: 'This field is required.' },
                 }}
               />
+              <ValidatedField
+                label="Process Status"
+                id="doc-store-process_status"
+                name="process_status"
+                data-cy="process_status"
+                type="text"
+                validate={{
+                  required: { value: true, message: 'This field is required.' },
+                  min: { value: 0, message: 'This field should be at least 0.' },
+                  max: { value: 2, message: 'This field cannot be more than 2.' },
+                  validate: v => isNumber(v) || 'This field should be a number.',
+                }}
+              />
               <ValidatedField id="doc-store-user" name="user" data-cy="user" label="User" type="select" required>
                 <option value="" key="0" />
                 {users

@@ -5,6 +5,7 @@ export interface IDocStore {
   fileName?: string;
   fileObjectContentType?: string;
   fileObject?: string;
+  process_status?: number;
   user?: IUser;
 }
 

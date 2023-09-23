@@ -102,6 +102,7 @@ class DocStoreGatlingTest extends Simulation {
             .body(StringBody("""{
                 "fileName":"SAMPLE_TEXT"
                 , "fileObject":null
+                , "process_status":"0"
                 }""")).asJson
             .check(status.is(201))
             .check(headerRegex("Location", "(.*)").saveAs("new_docStore_url"))).exitHereIfFailed

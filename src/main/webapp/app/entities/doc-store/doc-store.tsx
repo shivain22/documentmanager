@@ -129,6 +129,9 @@ export const DocStore = () => {
                   <th className="hand" onClick={sort('fileObject')}>
                     File Object <FontAwesomeIcon icon="sort" />
                   </th>
+                  <th className="hand" onClick={sort('process_status')}>
+                    Process Status <FontAwesomeIcon icon="sort" />
+                  </th>
                   <th>
                     User <FontAwesomeIcon icon="sort" />
                   </th>
@@ -156,6 +159,7 @@ export const DocStore = () => {
                         </div>
                       ) : null}
                     </td>
+                    <td>{docStore.process_status}</td>
                     <td>{docStore.user ? docStore.user.login : ''}</td>
                     <td className="text-end">
                       <div className="btn-group flex-btn-group-container">

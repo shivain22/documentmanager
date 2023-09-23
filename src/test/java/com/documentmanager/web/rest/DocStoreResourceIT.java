@@ -53,6 +53,10 @@ class DocStoreResourceIT {
     private static final String DEFAULT_FILE_OBJECT_CONTENT_TYPE = "image/jpg";
     private static final String UPDATED_FILE_OBJECT_CONTENT_TYPE = "image/png";
 
+    private static final Integer DEFAULT_PROCESS_STATUS = 0;
+    private static final Integer UPDATED_PROCESS_STATUS = 1;
+    private static final Integer SMALLER_PROCESS_STATUS = 0 - 1;
+
     private static final String ENTITY_API_URL = "/api/doc-stores";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
 
@@ -89,7 +93,8 @@ class DocStoreResourceIT {
         DocStore docStore = new DocStore()
             .fileName(DEFAULT_FILE_NAME)
             .fileObject(DEFAULT_FILE_OBJECT)
-            .fileObjectContentType(DEFAULT_FILE_OBJECT_CONTENT_TYPE);
+            .fileObjectContentType(DEFAULT_FILE_OBJECT_CONTENT_TYPE)
+            .process_status(DEFAULT_PROCESS_STATUS);
         // Add required entity
         User user = UserResourceIT.createEntity(em);
         em.persist(user);
@@ -108,7 +113,8 @@ class DocStoreResourceIT {
         DocStore docStore = new DocStore()
             .fileName(UPDATED_FILE_NAME)
             .fileObject(UPDATED_FILE_OBJECT)
-            .fileObjectContentType(UPDATED_FILE_OBJECT_CONTENT_TYPE);
+            .fileObjectContentType(UPDATED_FILE_OBJECT_CONTENT_TYPE)
+            .process_status(UPDATED_PROCESS_STATUS);
         // Add required entity
         User user = UserResourceIT.createEntity(em);
         em.persist(user);
@@ -144,6 +150,7 @@ class DocStoreResourceIT {
         assertThat(testDocStore.getFileName()).isEqualTo(DEFAULT_FILE_NAME);
         assertThat(testDocStore.getFileObject()).isEqualTo(DEFAULT_FILE_OBJECT);
         assertThat(testDocStore.getFileObjectContentType()).isEqualTo(DEFAULT_FILE_OBJECT_CONTENT_TYPE);
+        assertThat(testDocStore.getProcess_status()).isEqualTo(DEFAULT_PROCESS_STATUS);
     }
 
     @Test
@@ -195,6 +202,29 @@ class DocStoreResourceIT {
 
     @Test
     @Transactional
+    void checkProcess_statusIsRequired() throws Exception {
+        int databaseSizeBeforeTest = docStoreRepository.findAll().size();
+        // set the field null
+        docStore.setProcess_status(null);
+
+        // Create the DocStore, which fails.
+        DocStoreDTO docStoreDTO = docStoreMapper.toDto(docStore);
+
+        restDocStoreMockMvc
+            .perform(
+                post(ENTITY_API_URL)
+                    .with(csrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(docStoreDTO))
+            )
+            .andExpect(status().isBadRequest());
+
+        List<DocStore> docStoreList = docStoreRepository.findAll();
+        assertThat(docStoreList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     void getAllDocStores() throws Exception {
         // Initialize the database
         docStoreRepository.saveAndFlush(docStore);
@@ -207,7 +237,8 @@ class DocStoreResourceIT {
             .andExpect(jsonPath("$.[*].id").value(hasItem(docStore.getId().intValue())))
             .andExpect(jsonPath("$.[*].fileName").value(hasItem(DEFAULT_FILE_NAME)))
             .andExpect(jsonPath("$.[*].fileObjectContentType").value(hasItem(DEFAULT_FILE_OBJECT_CONTENT_TYPE)))
-            .andExpect(jsonPath("$.[*].fileObject").value(hasItem(Base64Utils.encodeToString(DEFAULT_FILE_OBJECT))));
+            .andExpect(jsonPath("$.[*].fileObject").value(hasItem(Base64Utils.encodeToString(DEFAULT_FILE_OBJECT))))
+            .andExpect(jsonPath("$.[*].process_status").value(hasItem(DEFAULT_PROCESS_STATUS)));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -241,7 +272,8 @@ class DocStoreResourceIT {
             .andExpect(jsonPath("$.id").value(docStore.getId().intValue()))
             .andExpect(jsonPath("$.fileName").value(DEFAULT_FILE_NAME))
             .andExpect(jsonPath("$.fileObjectContentType").value(DEFAULT_FILE_OBJECT_CONTENT_TYPE))
-            .andExpect(jsonPath("$.fileObject").value(Base64Utils.encodeToString(DEFAULT_FILE_OBJECT)));
+            .andExpect(jsonPath("$.fileObject").value(Base64Utils.encodeToString(DEFAULT_FILE_OBJECT)))
+            .andExpect(jsonPath("$.process_status").value(DEFAULT_PROCESS_STATUS));
     }
 
     @Test
@@ -329,6 +361,97 @@ class DocStoreResourceIT {
 
     @Test
     @Transactional
+    void getAllDocStoresByProcess_statusIsEqualToSomething() throws Exception {
+        // Initialize the database
+        docStoreRepository.saveAndFlush(docStore);
+
+        // Get all the docStoreList where process_status equals to DEFAULT_PROCESS_STATUS
+        defaultDocStoreShouldBeFound("process_status.equals=" + DEFAULT_PROCESS_STATUS);
+
+        // Get all the docStoreList where process_status equals to UPDATED_PROCESS_STATUS
+        defaultDocStoreShouldNotBeFound("process_status.equals=" + UPDATED_PROCESS_STATUS);
+    }
+
+    @Test
+    @Transactional
+    void getAllDocStoresByProcess_statusIsInShouldWork() throws Exception {
+        // Initialize the database
+        docStoreRepository.saveAndFlush(docStore);
+
+        // Get all the docStoreList where process_status in DEFAULT_PROCESS_STATUS or UPDATED_PROCESS_STATUS
+        defaultDocStoreShouldBeFound("process_status.in=" + DEFAULT_PROCESS_STATUS + "," + UPDATED_PROCESS_STATUS);
+
+        // Get all the docStoreList where process_status equals to UPDATED_PROCESS_STATUS
+        defaultDocStoreShouldNotBeFound("process_status.in=" + UPDATED_PROCESS_STATUS);
+    }
+
+    @Test
+    @Transactional
+    void getAllDocStoresByProcess_statusIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        docStoreRepository.saveAndFlush(docStore);
+
+        // Get all the docStoreList where process_status is not null
+        defaultDocStoreShouldBeFound("process_status.specified=true");
+
+        // Get all the docStoreList where process_status is null
+        defaultDocStoreShouldNotBeFound("process_status.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllDocStoresByProcess_statusIsGreaterThanOrEqualToSomething() throws Exception {
+        // Initialize the database
+        docStoreRepository.saveAndFlush(docStore);
+
+        // Get all the docStoreList where process_status is greater than or equal to DEFAULT_PROCESS_STATUS
+        defaultDocStoreShouldBeFound("process_status.greaterThanOrEqual=" + DEFAULT_PROCESS_STATUS);
+
+        // Get all the docStoreList where process_status is greater than or equal to (DEFAULT_PROCESS_STATUS + 1)
+        defaultDocStoreShouldNotBeFound("process_status.greaterThanOrEqual=" + (DEFAULT_PROCESS_STATUS + 1));
+    }
+
+    @Test
+    @Transactional
+    void getAllDocStoresByProcess_statusIsLessThanOrEqualToSomething() throws Exception {
+        // Initialize the database
+        docStoreRepository.saveAndFlush(docStore);
+
+        // Get all the docStoreList where process_status is less than or equal to DEFAULT_PROCESS_STATUS
+        defaultDocStoreShouldBeFound("process_status.lessThanOrEqual=" + DEFAULT_PROCESS_STATUS);
+
+        // Get all the docStoreList where process_status is less than or equal to SMALLER_PROCESS_STATUS
+        defaultDocStoreShouldNotBeFound("process_status.lessThanOrEqual=" + SMALLER_PROCESS_STATUS);
+    }
+
+    @Test
+    @Transactional
+    void getAllDocStoresByProcess_statusIsLessThanSomething() throws Exception {
+        // Initialize the database
+        docStoreRepository.saveAndFlush(docStore);
+
+        // Get all the docStoreList where process_status is less than DEFAULT_PROCESS_STATUS
+        defaultDocStoreShouldNotBeFound("process_status.lessThan=" + DEFAULT_PROCESS_STATUS);
+
+        // Get all the docStoreList where process_status is less than (DEFAULT_PROCESS_STATUS + 1)
+        defaultDocStoreShouldBeFound("process_status.lessThan=" + (DEFAULT_PROCESS_STATUS + 1));
+    }
+
+    @Test
+    @Transactional
+    void getAllDocStoresByProcess_statusIsGreaterThanSomething() throws Exception {
+        // Initialize the database
+        docStoreRepository.saveAndFlush(docStore);
+
+        // Get all the docStoreList where process_status is greater than DEFAULT_PROCESS_STATUS
+        defaultDocStoreShouldNotBeFound("process_status.greaterThan=" + DEFAULT_PROCESS_STATUS);
+
+        // Get all the docStoreList where process_status is greater than SMALLER_PROCESS_STATUS
+        defaultDocStoreShouldBeFound("process_status.greaterThan=" + SMALLER_PROCESS_STATUS);
+    }
+
+    @Test
+    @Transactional
     void getAllDocStoresByUserIsEqualToSomething() throws Exception {
         User user;
         if (TestUtil.findAll(em, User.class).isEmpty()) {
@@ -361,7 +484,8 @@ class DocStoreResourceIT {
             .andExpect(jsonPath("$.[*].id").value(hasItem(docStore.getId().intValue())))
             .andExpect(jsonPath("$.[*].fileName").value(hasItem(DEFAULT_FILE_NAME)))
             .andExpect(jsonPath("$.[*].fileObjectContentType").value(hasItem(DEFAULT_FILE_OBJECT_CONTENT_TYPE)))
-            .andExpect(jsonPath("$.[*].fileObject").value(hasItem(Base64Utils.encodeToString(DEFAULT_FILE_OBJECT))));
+            .andExpect(jsonPath("$.[*].fileObject").value(hasItem(Base64Utils.encodeToString(DEFAULT_FILE_OBJECT))))
+            .andExpect(jsonPath("$.[*].process_status").value(hasItem(DEFAULT_PROCESS_STATUS)));
 
         // Check, that the count call also returns 1
         restDocStoreMockMvc
@@ -409,7 +533,11 @@ class DocStoreResourceIT {
         DocStore updatedDocStore = docStoreRepository.findById(docStore.getId()).get();
         // Disconnect from session so that the updates on updatedDocStore are not directly saved in db
         em.detach(updatedDocStore);
-        updatedDocStore.fileName(UPDATED_FILE_NAME).fileObject(UPDATED_FILE_OBJECT).fileObjectContentType(UPDATED_FILE_OBJECT_CONTENT_TYPE);
+        updatedDocStore
+            .fileName(UPDATED_FILE_NAME)
+            .fileObject(UPDATED_FILE_OBJECT)
+            .fileObjectContentType(UPDATED_FILE_OBJECT_CONTENT_TYPE)
+            .process_status(UPDATED_PROCESS_STATUS);
         DocStoreDTO docStoreDTO = docStoreMapper.toDto(updatedDocStore);
 
         restDocStoreMockMvc
@@ -428,6 +556,7 @@ class DocStoreResourceIT {
         assertThat(testDocStore.getFileName()).isEqualTo(UPDATED_FILE_NAME);
         assertThat(testDocStore.getFileObject()).isEqualTo(UPDATED_FILE_OBJECT);
         assertThat(testDocStore.getFileObjectContentType()).isEqualTo(UPDATED_FILE_OBJECT_CONTENT_TYPE);
+        assertThat(testDocStore.getProcess_status()).isEqualTo(UPDATED_PROCESS_STATUS);
     }
 
     @Test
@@ -530,6 +659,7 @@ class DocStoreResourceIT {
         assertThat(testDocStore.getFileName()).isEqualTo(DEFAULT_FILE_NAME);
         assertThat(testDocStore.getFileObject()).isEqualTo(DEFAULT_FILE_OBJECT);
         assertThat(testDocStore.getFileObjectContentType()).isEqualTo(DEFAULT_FILE_OBJECT_CONTENT_TYPE);
+        assertThat(testDocStore.getProcess_status()).isEqualTo(DEFAULT_PROCESS_STATUS);
     }
 
     @Test
@@ -547,7 +677,8 @@ class DocStoreResourceIT {
         partialUpdatedDocStore
             .fileName(UPDATED_FILE_NAME)
             .fileObject(UPDATED_FILE_OBJECT)
-            .fileObjectContentType(UPDATED_FILE_OBJECT_CONTENT_TYPE);
+            .fileObjectContentType(UPDATED_FILE_OBJECT_CONTENT_TYPE)
+            .process_status(UPDATED_PROCESS_STATUS);
 
         restDocStoreMockMvc
             .perform(
@@ -565,6 +696,7 @@ class DocStoreResourceIT {
         assertThat(testDocStore.getFileName()).isEqualTo(UPDATED_FILE_NAME);
         assertThat(testDocStore.getFileObject()).isEqualTo(UPDATED_FILE_OBJECT);
         assertThat(testDocStore.getFileObjectContentType()).isEqualTo(UPDATED_FILE_OBJECT_CONTENT_TYPE);
+        assertThat(testDocStore.getProcess_status()).isEqualTo(UPDATED_PROCESS_STATUS);
     }
 
     @Test

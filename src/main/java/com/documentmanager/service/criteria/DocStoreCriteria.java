@@ -25,6 +25,8 @@ public class DocStoreCriteria implements Serializable, Criteria {
 
     private StringFilter fileName;
 
+    private IntegerFilter process_status;
+
     private StringFilter userId;
 
     private Boolean distinct;
@@ -34,6 +36,7 @@ public class DocStoreCriteria implements Serializable, Criteria {
     public DocStoreCriteria(DocStoreCriteria other) {
         this.id = other.id == null ? null : other.id.copy();
         this.fileName = other.fileName == null ? null : other.fileName.copy();
+        this.process_status = other.process_status == null ? null : other.process_status.copy();
         this.userId = other.userId == null ? null : other.userId.copy();
         this.distinct = other.distinct;
     }
@@ -73,6 +76,21 @@ public class DocStoreCriteria implements Serializable, Criteria {
         this.fileName = fileName;
     }
 
+    public IntegerFilter getProcess_status() {
+        return process_status;
+    }
+
+    public IntegerFilter process_status() {
+        if (process_status == null) {
+            process_status = new IntegerFilter();
+        }
+        return process_status;
+    }
+
+    public void setProcess_status(IntegerFilter process_status) {
+        this.process_status = process_status;
+    }
+
     public StringFilter getUserId() {
         return userId;
     }
@@ -108,6 +126,7 @@ public class DocStoreCriteria implements Serializable, Criteria {
         return (
             Objects.equals(id, that.id) &&
             Objects.equals(fileName, that.fileName) &&
+            Objects.equals(process_status, that.process_status) &&
             Objects.equals(userId, that.userId) &&
             Objects.equals(distinct, that.distinct)
         );
@@ -115,7 +134,7 @@ public class DocStoreCriteria implements Serializable, Criteria {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fileName, userId, distinct);
+        return Objects.hash(id, fileName, process_status, userId, distinct);
     }
 
     // prettier-ignore
@@ -124,6 +143,7 @@ public class DocStoreCriteria implements Serializable, Criteria {
         return "DocStoreCriteria{" +
             (id != null ? "id=" + id + ", " : "") +
             (fileName != null ? "fileName=" + fileName + ", " : "") +
+            (process_status != null ? "process_status=" + process_status + ", " : "") +
             (userId != null ? "userId=" + userId + ", " : "") +
             (distinct != null ? "distinct=" + distinct + ", " : "") +
             "}";
