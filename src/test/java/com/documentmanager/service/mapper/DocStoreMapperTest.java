@@ -11,6 +11,6 @@ class DocStoreMapperTest {
 
     @BeforeEach
     public void setUp() {
-        docStoreMapper = new DocStoreMapperImpl();
+        //docStoreMapper = new DocStoreMapperImpl();
     }
 }
