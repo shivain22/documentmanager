@@ -9,9 +9,12 @@ import java.io.InputStream;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,6 +30,12 @@ public class DocProcessor implements Runnable {
         this.docStoreDTO = docStoreDTO;
     }
 
+    @Autowired
+    DocColNameStoreService docColNameStoreService;
+
+    @Autowired
+    DocValueStoreService docValueStoreService;
+
     @Override
     public void run() {
         try {
@@ -35,7 +44,10 @@ public class DocProcessor implements Runnable {
             Workbook workbook = WorkbookFactory.create(stream);
             Sheet firstSheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = firstSheet.iterator();
-            int count = 0;
+            int rowCount = 0;
+            int colCount = 0;
+            List<DocColNameStore> docColNameStoreList = new LinkedList<>();
+            List<DocValueStore> docValueStoreList = new LinkedList<>();
             while (rowIterator.hasNext()) {
                 Row nextRow = rowIterator.next();
                 Iterator<Cell> cellIterator = nextRow.cellIterator();
@@ -44,8 +56,25 @@ public class DocProcessor implements Runnable {
                     int columnIndex = nextCell.getColumnIndex();
                     DataFormatter formatter = new DataFormatter();
                     String strValue = formatter.formatCellValue(nextCell);
+                    if (rowCount == 0) {
+                        DocColNameStore docColNameStore = new DocColNameStore();
+                        docColNameStore.setDocStore(docStoreDTO);
+                        docColNameStore.setColName(strValue);
+                        colNameStoreList.add(docColNameStore);
+                    } else if (rowCount > 0) {
+                        DocValueStore docValueStore = new DocValueStore();
+                        docValueStore.setDocStore(docStoreDTO);
+                        docValueStore.setDocColStore(docColNameStoreList.get(columnIndex).getId());
+                        docValueStore.setValue(strValue);
+                        docValueStoreList.add(docValueStore);
+                    }
                 }
-                count++;
+                if (rowCount == 0) {
+                    docColNameStoreService.saveAll(docColNameStoreList);
+                } else {
+                    docValueStoreService.saveAll(docValueStoreList);
+                }
+                rowCount++;
             }
             workbook.close();
             long end = System.currentTimeMillis();
