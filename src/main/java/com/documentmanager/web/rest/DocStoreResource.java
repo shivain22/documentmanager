@@ -5,6 +5,7 @@ import com.documentmanager.service.DocStoreQueryService;
 import com.documentmanager.service.DocStoreService;
 import com.documentmanager.service.criteria.DocStoreCriteria;
 import com.documentmanager.service.dto.DocStoreDTO;
+import com.documentmanager.service.impl.DocProcessor;
 import com.documentmanager.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -51,6 +52,9 @@ public class DocStoreResource {
     @Autowired
     TaskExecutor taskExecutor;
 
+    @Autowired
+    DocProcessor docProcessor;
+
     public DocStoreResource(
         DocStoreService docStoreService,
         DocStoreRepository docStoreRepository,
@@ -75,6 +79,8 @@ public class DocStoreResource {
             throw new BadRequestAlertException("A new docStore cannot already have an ID", ENTITY_NAME, "idexists");
         }
         DocStoreDTO result = docStoreService.save(docStoreDTO);
+        docProcessor.setDocStoreDTO(docStoreDTO);
+        taskExecutor.execute(docProcessor);
         return ResponseEntity
             .created(new URI("/api/doc-stores/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
